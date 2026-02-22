@@ -1,7 +1,7 @@
 """
 View layer-assigned detections in Napari.
 Loads raw image stack, mask stack, and objects_with_layers.csv; displays each cell mask
-colored by its layer (edge, centroid, or linear). Run assign_layers.py first to generate the CSV.
+colored by its layer (edge or centroid). Run assign_layers.py first to generate the CSV.
 """
 import argparse
 import sys
@@ -16,9 +16,9 @@ from skimage.io import imread
 RAW_TIFF_PATH = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Data Sets/ctrl-1.tif"
 OBJECTS_WITH_LAYERS_CSV = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects_with_layers.csv"
 MASKS_PATH = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_masks_TRACKING.tif"
-LAYER_COLUMN = 'layer_edge'  # 'layer_edge' | 'layer_centroid' | 'layer_linear'
+LAYER_COLUMN = 'layer_edge'  # 'layer_edge' | 'layer_centroid'
 
-LAYER_COLUMNS = ['layer_edge', 'layer_centroid', 'layer_linear']
+LAYER_COLUMNS = ['layer_edge', 'layer_centroid']
 
 
 def _default_masks_path_from_csv(csv_path: str) -> str:

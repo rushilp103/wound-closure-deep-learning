@@ -1,12 +1,12 @@
 """
 Layer assignment for wound-healing assays.
-Three methods: distance from wound edge (primary), distance from wound centroid, linear bands.
+Two methods: distance from wound edge (primary), distance from wound centroid.
 """
 import numpy as np
 import pandas as pd
 from scipy.ndimage import distance_transform_edt
 
-from wound_utils import get_wound_masks_from_stack, wound_centroid_and_radius
+from wound_utils import smooth_wound_mask, wound_centroid_and_radius
 
 # Default layer width in µm (as in plan)
 LAYER_WIDTH_UM = 49.0
@@ -28,6 +28,7 @@ def assign_layers_edge(
     um_per_pixel: float,
     layer_width_um: float = LAYER_WIDTH_UM,
     max_layer: int = MAX_LAYER_ID,
+    smooth_wound_sigma_px: float | None = 2.0,
 ) -> pd.DataFrame:
     """
     Assign layer_id = floor(distance_from_wound_edge_um / layer_width_um).
@@ -36,6 +37,7 @@ def assign_layers_edge(
 
     objects_df must have columns: x, y, t (pixel coordinates).
     wound_masks: list of (H,W) binary arrays, 1 = wound, 0 = not wound.
+    smooth_wound_sigma_px: If not None, smooth the wound mask with this Gaussian sigma (px) before distance transform.
     """
     out = objects_df.copy()
     dist_col = "distance_from_edge_um"
@@ -50,6 +52,10 @@ def assign_layers_edge(
         wound = wound_masks[t]
         if wound.sum() == 0:
             continue
+        if smooth_wound_sigma_px is not None and smooth_wound_sigma_px > 0:
+            wound = smooth_wound_mask(wound, sigma_px=smooth_wound_sigma_px)
+            if wound.sum() == 0:
+                continue
         # Distance from each non-wound pixel to nearest wound pixel (edge)
         not_wound = (wound == 0).astype(np.float32)
         dist_to_edge_px = distance_transform_edt(not_wound)
@@ -84,6 +90,7 @@ def assign_layers_centroid(
     um_per_pixel: float,
     layer_width_um: float = LAYER_WIDTH_UM,
     max_layer: int = MAX_LAYER_ID,
+    smooth_wound_sigma_px: float | None = 2.0,
 ) -> pd.DataFrame:
     """
     Assign layer_id = floor((distance_from_center_um - wound_radius_um) / layer_width_um).
@@ -91,6 +98,7 @@ def assign_layers_centroid(
 
     objects_df must have columns: x, y, t.
     wound_masks: list of (H,W) binary arrays.
+    smooth_wound_sigma_px: If not None, smooth the wound mask before computing centroid/radius (consistency with edge method).
     """
     out = objects_df.copy()
     dist_col = "distance_from_center_um"
@@ -103,6 +111,8 @@ def assign_layers_centroid(
         if t >= len(wound_masks):
             continue
         wound = wound_masks[t]
+        if smooth_wound_sigma_px is not None and smooth_wound_sigma_px > 0:
+            wound = smooth_wound_mask(wound, sigma_px=smooth_wound_sigma_px)
         cy, cx, radius_px = wound_centroid_and_radius(wound)
         if radius_px <= 0:
             continue
@@ -124,49 +134,24 @@ def assign_layers_centroid(
     return out
 
 
-def assign_layers_linear(
-    objects_df: pd.DataFrame,
-    um_per_pixel: float,
-    layer_width_um: float = LAYER_WIDTH_UM,
-    axis: str = "y",
-    y_min_px: float = 0,
-    x_min_px: float = 0,
-    max_layer: int = MAX_LAYER_ID,
-) -> pd.DataFrame:
-    """
-    Assign layer_id = floor((coord_um - coord_min_um) / layer_width_um).
-    No wound needed. axis 'y' => horizontal bands (layer by row); 'x' => vertical bands.
-
-    objects_df must have columns: x, y.
-    """
-    out = objects_df.copy()
-    layer_col = "layer_linear"
-    if axis == "y":
-        coord_px = objects_df["y"].values
-        coord_min_um = y_min_px * um_per_pixel
-    else:
-        coord_px = objects_df["x"].values
-        coord_min_um = x_min_px * um_per_pixel
-    coord_um = coord_px * um_per_pixel
-    lid = np.floor((coord_um - coord_min_um) / layer_width_um).astype(int)
-    lid = np.clip(lid, 0, max_layer)
-    out[layer_col] = lid
-    return out
-
-
 def assign_all_methods(
     objects_df: pd.DataFrame,
     wound_masks: list,
     um_per_pixel: float,
     layer_width_um: float = LAYER_WIDTH_UM,
+    smooth_wound_sigma_px: float | None = 2.0,
 ) -> pd.DataFrame:
     """
-    Run all three methods and return a single DataFrame with columns:
-    layer_edge, layer_centroid, layer_linear, distance_from_edge_um, distance_from_center_um.
+    Run edge and centroid methods and return a single DataFrame with columns:
+    layer_edge, layer_centroid, distance_from_edge_um, distance_from_center_um.
+    smooth_wound_sigma_px: If not None, smooth wound masks before edge/centroid methods for consistent layer width.
     """
-    df = assign_layers_edge(objects_df, wound_masks, um_per_pixel, layer_width_um)
-    df = assign_layers_centroid(df, wound_masks, um_per_pixel, layer_width_um)
-    df = assign_layers_linear(
-        df, um_per_pixel, layer_width_um, axis="y", y_min_px=0, x_min_px=0
+    df = assign_layers_edge(
+        objects_df, wound_masks, um_per_pixel, layer_width_um,
+        smooth_wound_sigma_px=smooth_wound_sigma_px,
+    )
+    df = assign_layers_centroid(
+        df, wound_masks, um_per_pixel, layer_width_um,
+        smooth_wound_sigma_px=smooth_wound_sigma_px,
     )
     return df

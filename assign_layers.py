@@ -1,6 +1,6 @@
 """
 Layer assignment script for wound-healing assay.
-Reads objects CSV and mask stack, runs edge / centroid / linear methods, writes CSV with layer IDs.
+Reads objects CSV and mask stack, runs edge and centroid methods, writes CSV with layer IDs.
 """
 import os
 import argparse
@@ -23,13 +23,17 @@ DEFAULT_LAYER_WIDTH_UM = 49.0
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Assign layer IDs (edge, centroid, linear) to object detections.")
+    parser = argparse.ArgumentParser(description="Assign layer IDs (edge, centroid) to object detections.")
     parser.add_argument("--objects", default=OBJECTS_CSV, help="Path to objects CSV (x, y, t, ...)")
     parser.add_argument("--masks", default=MASKS_PATH, help="Path to masks stack TIF (T, Y, X)")
     parser.add_argument("--output", default=OUTPUT_CSV, help="Output CSV with layer columns")
     parser.add_argument("--um-per-pixel", type=float, default=UM_PER_PIXEL, help="Micrometers per pixel")
     parser.add_argument("--layer-width", type=float, default=DEFAULT_LAYER_WIDTH_UM, help="Layer width in µm")
+    parser.add_argument("--smooth-wound", type=float, default=2.0, metavar="SIGMA", help="Gaussian sigma (px) to smooth wound boundary for consistent layer width (default: 2)")
+    parser.add_argument("--no-smooth-wound", action="store_true", help="Disable wound smoothing (use raw wound mask)")
     args = parser.parse_args()
+
+    smooth_sigma = None if args.no_smooth_wound else args.smooth_wound
 
     print("Loading objects...")
     objects_df = pd.read_csv(args.objects)
@@ -43,12 +47,15 @@ def main():
     wound_masks = get_wound_masks_from_stack(masks_stack)
     print(f"  > {len(wound_masks)} wound masks")
 
-    print("Assigning layers (edge, centroid, linear)...")
+    print("Assigning layers (edge, centroid)...")
+    if smooth_sigma is not None:
+        print(f"  > Smoothing wound boundary (sigma={smooth_sigma} px)")
     result = assign_all_methods(
         objects_df,
         wound_masks,
         um_per_pixel=args.um_per_pixel,
         layer_width_um=args.layer_width,
+        smooth_wound_sigma_px=smooth_sigma,
     )
 
     out_dir = os.path.dirname(args.output)
@@ -58,7 +65,7 @@ def main():
     print(f"Saved to {args.output}")
 
     # Summary
-    for col in ["layer_edge", "layer_centroid", "layer_linear"]:
+    for col in ["layer_edge", "layer_centroid"]:
         if col in result.columns:
             valid = result[result[col] >= 0]
             print(f"  {col}: {valid[col].nunique()} unique layers, range [{valid[col].min()}, {valid[col].max()}]")

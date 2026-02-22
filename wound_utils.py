@@ -3,7 +3,26 @@ Wound segmentation for wound-healing assays.
 Uses the mask stack: background (0) = potential wound; largest central hole = wound.
 """
 import numpy as np
+from scipy.ndimage import gaussian_filter
 from skimage.measure import label
+
+
+def smooth_wound_mask(wound_mask: np.ndarray, sigma_px: float = 2.0) -> np.ndarray:
+    """
+    Smooth the wound boundary by Gaussian blur and re-threshold.
+    Reduces jaggedness so distance-from-edge layers have more consistent width.
+
+    Args:
+        wound_mask: Binary (H, W), 1 = wound, 0 = not wound.
+        sigma_px: Gaussian sigma in pixels; larger = smoother boundary. Use 0 or skip to disable.
+
+    Returns:
+        Binary mask same shape, 1 = wound, 0 = not wound.
+    """
+    if sigma_px <= 0 or wound_mask.sum() == 0:
+        return wound_mask
+    blurred = gaussian_filter(wound_mask.astype(np.float64), sigma=sigma_px)
+    return (blurred >= 0.5).astype(np.uint8)
 
 
 def get_wound_mask_for_frame(frame_mask: np.ndarray) -> np.ndarray:
