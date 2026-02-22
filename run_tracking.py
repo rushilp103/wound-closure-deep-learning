@@ -6,11 +6,11 @@ import os
 from tqdm import tqdm
 
 # --- CONFIGURATION ---
-INPUT_CSV = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results/ctrl-1_objects.csv'
-OUTPUT_DIR = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results'
+INPUT_CSV = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects.csv'
+OUTPUT_DIR = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results'
 FILE_NAME = 'ctrl-1_tracks.h5'
 
-CONFIG_PATH = '/Users/Rushilp/Projects/VSCode/Thesis Algo/btrack_config.json'
+CONFIG_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/btrack_config.json'
 
 # Tracking Parameters
 MAX_SEARCH_RADIUS = 50.0

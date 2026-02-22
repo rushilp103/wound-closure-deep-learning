@@ -5,8 +5,8 @@ import btrack
 from skimage.io import imread
 
 # --- CONFIGURATION ---
-RAW_TIFF_PATH = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/ctrl-1.tif'
-TRACKS_H5_PATH = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results/ctrl-1_converted_tracks.csv'
+RAW_TIFF_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Data Sets/ctrl-1.tif'
+TRACKS_H5_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_converted_tracks.csv'
 
 def view_tracks():
     print(f"Loading napari viewer...")

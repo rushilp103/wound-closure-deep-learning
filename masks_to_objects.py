@@ -6,8 +6,8 @@ import os
 from tqdm import tqdm
 
 # Configuration
-input_masks_path = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results/ctrl-1_masks_TRACKING.tif'
-output_objects_dir = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results'
+input_masks_path = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_masks_TRACKING.tif'
+output_objects_dir = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results'
 file_name = 'ctrl-1_objects.csv'
 
 # Pixel calibration

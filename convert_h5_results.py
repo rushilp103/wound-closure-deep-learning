@@ -4,8 +4,8 @@ import numpy as np
 import os
 
 # --- CONFIGURATION ---
-H5_FILE_PATH = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results/ctrl-1_tracks.h5'
-OUTPUT_CSV = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results/ctrl-1_converted_tracks.csv'
+H5_FILE_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_tracks.h5'
+OUTPUT_CSV = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_converted_tracks.csv'
 
 def convert_h5_to_csv():
     print(f'Opening HDF5 file: {H5_FILE_PATH}')

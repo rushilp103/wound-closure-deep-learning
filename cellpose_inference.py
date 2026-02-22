@@ -12,8 +12,8 @@ from skimage.measure import regionprops
 logging.getLogger('cellpose').setLevel(logging.ERROR)
 
 # Configuration
-input_path = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/ctrl-1.tif'
-output_dir = '/Users/Rushilp/Downloads/UMass/Honors Thesis/Data Sets/Cellpose-SAM Results'
+input_path = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Data Sets/ctrl-1.tif'
+output_dir = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results'
 file_name = 'ctrl-1'
 
 # Device setup
