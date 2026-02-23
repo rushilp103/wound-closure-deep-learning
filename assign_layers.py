@@ -31,6 +31,9 @@ def main():
     parser.add_argument("--layer-width", type=float, default=DEFAULT_LAYER_WIDTH_UM, help="Layer width in µm")
     parser.add_argument("--smooth-wound", type=float, default=2.0, metavar="SIGMA", help="Gaussian sigma (px) to smooth wound boundary for consistent layer width (default: 2)")
     parser.add_argument("--no-smooth-wound", action="store_true", help="Disable wound smoothing (use raw wound mask)")
+    parser.add_argument("--closing-radius", type=int, default=10, help="Morphological closing radius (px) to fill intercellular gaps (default: 10)")
+    parser.add_argument("--opening-radius", type=int, default=5, help="Morphological opening radius (px) to remove small debris from wound (default: 5)")
+    parser.add_argument("--erosion-radius", type=int, default=3, help="Morphological erosion radius (px) to pull back wound boundary (default: 3)")
     args = parser.parse_args()
 
     smooth_sigma = None if args.no_smooth_wound else args.smooth_wound
@@ -44,7 +47,13 @@ def main():
     print(f"  > Shape: {masks_stack.shape}")
 
     print("Computing wound masks per frame...")
-    wound_masks = get_wound_masks_from_stack(masks_stack)
+    print(f"  > Using morphological operations: closing={args.closing_radius}px, opening={args.opening_radius}px, erosion={args.erosion_radius}px")
+    wound_masks = get_wound_masks_from_stack(
+        masks_stack, 
+        closing_radius=args.closing_radius,
+        opening_radius=args.opening_radius,
+        erosion_radius=args.erosion_radius,
+    )
     print(f"  > {len(wound_masks)} wound masks")
 
     print("Assigning layers (edge, centroid)...")

@@ -72,6 +72,9 @@ def view_layers(
     smooth_wound_sigma_px: float | None = None,
     show_boundaries: bool = True,
     max_boundaries: int = 5,
+    closing_radius: int = 10,
+    opening_radius: int = 5,
+    erosion_radius: int = 3,
 ):
     print("Loading Napari viewer...")
     viewer = napari.Viewer()
@@ -117,7 +120,12 @@ def view_layers(
     wound_label = max(layer_to_label.values()) + 1
 
     # Compute wound masks once (used for layer mask and optionally for boundary contours)
-    wound_masks = get_wound_masks_from_stack(masks)
+    wound_masks = get_wound_masks_from_stack(
+        masks, 
+        closing_radius=closing_radius,
+        opening_radius=opening_radius,
+        erosion_radius=erosion_radius,
+    )
     if smooth_wound_sigma_px is not None and smooth_wound_sigma_px > 0:
         wound_masks = [smooth_wound_mask(w, sigma_px=smooth_wound_sigma_px) for w in wound_masks]
 
@@ -198,6 +206,24 @@ def main():
         default=5,
         help="Number of layer boundaries to draw at 49, 98, ... µm (default: 5)",
     )
+    parser.add_argument(
+        "--closing-radius",
+        type=int,
+        default=10,
+        help="Morphological closing radius (px) to fill intercellular gaps (default: 10)",
+    )
+    parser.add_argument(
+        "--opening-radius",
+        type=int,
+        default=5,
+        help="Morphological opening radius (px) to remove small debris from wound (default: 5)",
+    )
+    parser.add_argument(
+        "--erosion-radius",
+        type=int,
+        default=3,
+        help="Morphological erosion radius (px) to pull back wound boundary (default: 3)",
+    )
     args = parser.parse_args()
 
     masks_path = args.masks if args.masks is not None else _default_masks_path_from_csv(args.csv)
@@ -212,6 +238,9 @@ def main():
         smooth_wound_sigma_px=args.smooth_wound,
         show_boundaries=not args.no_boundaries,
         max_boundaries=args.max_boundaries,
+        closing_radius=args.closing_radius,
+        opening_radius=args.opening_radius,
+        erosion_radius=args.erosion_radius,
     )
 
 
