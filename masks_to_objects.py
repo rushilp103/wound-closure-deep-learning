@@ -50,6 +50,13 @@ def extract_objects(masks_path, output_path):
     all_data_df['x'] = all_data_df['x'] * SCALE_X
     all_data_df['y'] = all_data_df['y'] * SCALE_Y
 
+    # Aspect ratio (major / minor); NaN where minor_axis_length <= 0
+    all_data_df['aspect_ratio'] = np.where(
+        all_data_df['minor_axis_length'] > 0,
+        all_data_df['major_axis_length'] / all_data_df['minor_axis_length'],
+        np.nan,
+    )
+
     print(f'Found {len(all_data_df)} total cell observations across {masks.shape[0]} frames.')
 
     # Save to CSV
