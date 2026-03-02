@@ -5,10 +5,11 @@ from skimage.measure import regionprops_table
 import os
 from tqdm import tqdm
 
-# Configuration
-input_masks_path = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_masks_TRACKING.tif'
-output_objects_dir = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results'
-file_name = 'ctrl-1_objects.csv'
+from pipeline_config import masks_tracking_path, objects_csv_path
+
+# Configuration (from pipeline_config)
+input_masks_path = masks_tracking_path
+output_objects_dir = os.path.dirname(objects_csv_path)
 
 # Pixel calibration
 SCALE_X = 1.0
@@ -67,5 +68,4 @@ def extract_objects(masks_path, output_path):
     print(f"Saved extracted object data to: {output_path}")
 
 if __name__ == "__main__":
-    output_full_path = os.path.join(output_objects_dir, file_name)
-    extract_objects(input_masks_path, output_full_path)
+    extract_objects(input_masks_path, objects_csv_path)

@@ -4,9 +4,11 @@ import numpy as np
 import btrack
 from skimage.io import imread
 
+from pipeline_config import input_tif_path, converted_tracks_csv_path
+
 # --- CONFIGURATION ---
-RAW_TIFF_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Data Sets/ctrl-1.tif'
-TRACKS_H5_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_converted_tracks.csv'
+RAW_TIFF_PATH = input_tif_path
+TRACKS_H5_PATH = converted_tracks_csv_path
 
 def view_tracks():
     print(f"Loading napari viewer...")

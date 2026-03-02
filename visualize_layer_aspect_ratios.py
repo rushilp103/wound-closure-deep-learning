@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from pipeline_config import objects_with_layers_csv_path
+
 LAYER_COLUMNS = ['layer_edge', 'layer_centroid']
 REQUIRED_ASPECT = ['t', 'major_axis_length', 'minor_axis_length']
 REQUIRED_SIZE = ['t', 'area']
-DEFAULT_CSV = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects_with_layers.csv"
+DEFAULT_CSV = objects_with_layers_csv_path
 
 
 def _prepare_size_df(

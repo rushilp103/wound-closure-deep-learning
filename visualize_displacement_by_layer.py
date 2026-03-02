@@ -11,9 +11,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from pipeline_config import objects_with_layers_csv_path
+
 LAYER_COLUMNS = ['layer_edge', 'layer_centroid']
 REQUIRED_COLUMNS = ['t', 'obj_id', 'x', 'y']
-DEFAULT_CSV = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects_with_layers.csv"
+DEFAULT_CSV = objects_with_layers_csv_path
 
 
 def _compute_displacement_by_layer(

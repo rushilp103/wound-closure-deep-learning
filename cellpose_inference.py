@@ -11,10 +11,16 @@ from skimage.measure import regionprops
 
 logging.getLogger('cellpose').setLevel(logging.ERROR)
 
-# Configuration
-input_path = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Data Sets/ctrl-1.tif'
-output_dir = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results'
-file_name = 'ctrl-1'
+from pipeline_config import (
+    input_tif_path,
+    RESULTS_DIR,
+    BASE_NAME,
+)
+
+# Configuration (from pipeline_config)
+input_path = input_tif_path
+output_dir = RESULTS_DIR
+file_name = BASE_NAME
 
 # Device setup
 if torch.backends.mps.is_available():

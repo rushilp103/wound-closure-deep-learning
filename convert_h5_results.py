@@ -3,9 +3,12 @@ import pandas as pd
 import numpy as np
 import os
 
+from pipeline_config import tracks_h5_path, converted_tracks_csv_path
+
 # --- CONFIGURATION ---
-H5_FILE_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_tracks.h5'
-OUTPUT_CSV = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_converted_tracks.csv'
+H5_FILE_PATH = tracks_h5_path
+OUTPUT_CSV = converted_tracks_csv_path
+
 
 def convert_h5_to_csv():
     print(f'Opening HDF5 file: {H5_FILE_PATH}')

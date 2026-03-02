@@ -5,12 +5,18 @@ import numpy as np
 import os
 from tqdm import tqdm
 
-# --- CONFIGURATION ---
-INPUT_CSV = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects.csv'
-OUTPUT_DIR = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results'
-FILE_NAME = 'ctrl-1_tracks.h5'
+from pipeline_config import (
+    objects_csv_path,
+    RESULTS_DIR,
+    tracks_h5_path,
+    BTRACK_CONFIG_PATH,
+)
 
-CONFIG_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/btrack_config.json'
+# --- CONFIGURATION ---
+INPUT_CSV = objects_csv_path
+OUTPUT_DIR = RESULTS_DIR
+FILE_NAME = os.path.basename(tracks_h5_path)
+CONFIG_PATH = BTRACK_CONFIG_PATH
 
 # Tracking Parameters
 MAX_SEARCH_RADIUS = 50.0
@@ -54,7 +60,7 @@ def run_tracking():
     # 3. Ensure output directory exists
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
-    output_path = os.path.join(OUTPUT_DIR, FILE_NAME)
+    output_path = tracks_h5_path
 
     # 4. Run Tracker
     print("Starting tracking...")

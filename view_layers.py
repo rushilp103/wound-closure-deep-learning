@@ -16,12 +16,17 @@ from skimage.io import imread
 from skimage.measure import find_contours
 
 from wound_utils import get_wound_masks_from_stack, smooth_wound_mask
+from pipeline_config import (
+    input_tif_path,
+    objects_with_layers_csv_path,
+    masks_tracking_layers_path,
+)
 
 # --- CONFIGURATION ---
-RAW_TIFF_PATH = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Data Sets/ctrl-1.tif"
-OBJECTS_WITH_LAYERS_CSV = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects_with_layers.csv"
-MASKS_PATH = "/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_masks_TRACKING.tif"
-LAYER_COLUMN = 'layer_edge'  # 'layer_edge' | 'layer_centroid'
+RAW_TIFF_PATH = input_tif_path
+OBJECTS_WITH_LAYERS_CSV = objects_with_layers_csv_path
+MASKS_PATH = masks_tracking_layers_path
+LAYER_COLUMN = 'layer_centroid'  # 'layer_edge' | 'layer_centroid'
 
 LAYER_COLUMNS = ['layer_edge', 'layer_centroid']
 

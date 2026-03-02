@@ -10,14 +10,19 @@ import tifffile
 
 from wound_utils import get_wound_masks_from_stack
 from layer_assignment import assign_all_methods
+from pipeline_config import (
+    masks_tracking_layers_path,
+    objects_csv_layers_path,
+    objects_with_layers_csv_path,
+)
 
 # --- CONFIGURATION ---
 # Micrometers per pixel (set from your microscope/calibration). If unknown, use 1.0 and layers are in "pixel-width" units.
 UM_PER_PIXEL = 1.0
 
-MASKS_PATH = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_masks_TRACKING.tif'
-OBJECTS_CSV = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects.csv'
-OUTPUT_CSV = '/Users/Rushilp/Projects/VSCode/Image-Analysis-and-Segmentation-of-Wound-Gap-Closure/Cellpose-SAM Results/ctrl-1_objects_with_layers.csv'
+MASKS_PATH = masks_tracking_layers_path
+OBJECTS_CSV = objects_csv_layers_path
+OUTPUT_CSV = objects_with_layers_csv_path
 
 DEFAULT_LAYER_WIDTH_UM = 49.0
 
