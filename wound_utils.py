@@ -11,7 +11,7 @@ from skimage.morphology import disk
 def smooth_wound_mask(wound_mask: np.ndarray, sigma_px: float = 2.0) -> np.ndarray:
     """
     Smooth the wound boundary by Gaussian blur and re-threshold.
-    Reduces jaggedness so distance-from-edge layers have more consistent width.
+    Reduces jaggedness for more stable wound geometry in downstream layer assignment.
 
     Args:
         wound_mask: Binary (H, W), 1 = wound, 0 = not wound.

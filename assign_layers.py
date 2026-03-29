@@ -1,6 +1,6 @@
 """
 Layer assignment script for wound-healing assay.
-Reads objects CSV and mask stack, runs edge and centroid methods, writes CSV with layer IDs.
+Reads objects CSV and mask stack, assigns centroid-based layers, writes CSV with layer IDs.
 """
 import os
 import argparse
@@ -9,7 +9,7 @@ import pandas as pd
 import tifffile
 
 from wound_utils import get_wound_masks_from_stack
-from layer_assignment import assign_all_methods
+from layer_assignment import assign_layers_centroid
 from pipeline_config import (
     masks_tracking_layers_path,
     objects_csv_layers_path,
@@ -28,7 +28,7 @@ DEFAULT_LAYER_WIDTH_UM = 49.0
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Assign layer IDs (edge, centroid) to object detections.")
+    parser = argparse.ArgumentParser(description="Assign centroid-based layer IDs to object detections.")
     parser.add_argument("--objects", default=OBJECTS_CSV, help="Path to objects CSV (x, y, t, ...)")
     parser.add_argument("--masks", default=MASKS_PATH, help="Path to masks stack TIF (T, Y, X)")
     parser.add_argument("--output", default=OUTPUT_CSV, help="Output CSV with layer columns")
@@ -61,10 +61,10 @@ def main():
     )
     print(f"  > {len(wound_masks)} wound masks")
 
-    print("Assigning layers (edge, centroid)...")
+    print("Assigning layers (centroid / radius)...")
     if smooth_sigma is not None:
         print(f"  > Smoothing wound boundary (sigma={smooth_sigma} px)")
-    result = assign_all_methods(
+    result = assign_layers_centroid(
         objects_df,
         wound_masks,
         um_per_pixel=args.um_per_pixel,
@@ -79,10 +79,12 @@ def main():
     print(f"Saved to {args.output}")
 
     # Summary
-    for col in ["layer_edge", "layer_centroid"]:
-        if col in result.columns:
-            valid = result[result[col] >= 0]
-            print(f"  {col}: {valid[col].nunique()} unique layers, range [{valid[col].min()}, {valid[col].max()}]")
+    if "layer_centroid" in result.columns:
+        valid = result[result["layer_centroid"] >= 0]
+        print(
+            f"  layer_centroid: {valid['layer_centroid'].nunique()} unique layers, "
+            f"range [{valid['layer_centroid'].min()}, {valid['layer_centroid'].max()}]"
+        )
 
 
 if __name__ == "__main__":

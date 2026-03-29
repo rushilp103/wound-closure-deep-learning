@@ -13,7 +13,7 @@ import pandas as pd
 
 from pipeline_config import objects_with_layers_csv_path
 
-LAYER_COLUMNS = ['layer_edge', 'layer_centroid']
+LAYER_COLUMNS = ['layer_centroid']
 REQUIRED_COLUMNS = ['t', 'obj_id', 'major_axis_length', 'minor_axis_length']
 DEFAULT_CSV = objects_with_layers_csv_path
 
@@ -29,7 +29,7 @@ def _default_output_path(csv_path: str) -> str:
 def compute_layer_aspect_ratios(
     csv_path: str,
     output_path: str,
-    layer_column: str = 'layer_edge',
+    layer_column: str = 'layer_centroid',
     max_sample: int = 200,
     min_cells: int = 3,
     seed: int = 42,
@@ -97,9 +97,9 @@ def main():
     parser.add_argument("--output", default=None, help="Output CSV path (default: derived from --csv)")
     parser.add_argument(
         "--layer",
-        default="layer_edge",
+        default="layer_centroid",
         choices=LAYER_COLUMNS,
-        help="Layer column to use (default: layer_edge)",
+        help="Layer column to use (default: layer_centroid)",
     )
     parser.add_argument(
         "--max-sample",

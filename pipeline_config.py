@@ -14,7 +14,7 @@ RESULTS_DIR = os.path.join(PROJECT_ROOT, "Cellpose-SAM Results")
 
 # Dataset switch: set to the base name of your input TIFF (without .tif).
 # Example: "ctrl-1" for Data Sets/ctrl-1.tif, "treat-1" for Data Sets/treat-1.tif
-BASE_NAME = "treat-1"
+BASE_NAME = "ctrl-1"
 
 # Project-level config (not per-dataset)
 BTRACK_CONFIG_PATH = os.path.join(PROJECT_ROOT, "btrack_config.json")
