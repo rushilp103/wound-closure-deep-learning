@@ -3,10 +3,12 @@ Plot per-layer aspect ratio (boxplots over time) and mean track speed (lines ove
 Reads objects_with_layers.csv and optionally converted_tracks.csv. Outside-wound layers are
 1-based (1..10 by default, matching assign_layers.py); tab10 colors map layer N to palette N-1.
 Subset via --layers. Use --plot to show both plots, aspect only, or speed only.
+Speed subplot: mean per (frame, layer) with optional error bars (--speed-error sem|std|none).
 """
 from __future__ import annotations
 
 import argparse
+from typing import Literal
 import os
 import sys
 
@@ -150,23 +152,41 @@ def mean_speed_lines(
     layers: list[int],
     colors: dict[int, tuple],
     ylabel: str,
+    speed_error: Literal["sem", "std", "none"] = "sem",
 ) -> None:
     seg_df = seg_df[seg_df["layer"].isin(layers)].copy()
     if seg_df.empty:
         ax.set_title("Mean speed over time (no data)")
         ax.set_ylabel(ylabel)
         return
-    agg = seg_df.groupby(["t", "layer"], as_index=False)["speed"].mean()
+    agg = (
+        seg_df.groupby(["t", "layer"], as_index=False)["speed"].agg(
+            mean="mean", sem="sem", std="std"
+        )
+    )
     for layer in sorted(layers):
         sub = agg[agg["layer"] == layer].sort_values("t")
         if sub.empty:
             continue
-        ax.plot(
-            sub["t"],
-            sub["speed"],
+        x = sub["t"]
+        y = sub["mean"]
+        if speed_error == "none":
+            ax.plot(x, y, color=colors[layer], label=f"Layer {layer}", linewidth=1.5)
+            continue
+        if speed_error == "sem":
+            yerr = sub["sem"].fillna(0.0).to_numpy()
+        else:
+            yerr = sub["std"].fillna(0.0).to_numpy()
+        ax.errorbar(
+            x,
+            y,
+            yerr=yerr,
+            fmt="-",
             color=colors[layer],
             label=f"Layer {layer}",
             linewidth=1.5,
+            capsize=2.5,
+            elinewidth=0.8,
         )
     ax.set_xlabel("Frame (t)")
     ax.set_ylabel(ylabel)
@@ -223,6 +243,12 @@ def main() -> None:
         default=None,
         metavar="MIN",
         help="Minutes per frame; use with --um-per-pixel for physical speed",
+    )
+    parser.add_argument(
+        "--speed-error",
+        choices=("sem", "std", "none"),
+        default="sem",
+        help="Error bars on speed plot: sem (standard error of mean, default), std, or none",
     )
     args = parser.parse_args()
 
@@ -290,13 +316,15 @@ def main() -> None:
     if args.plot == "both":
         fig, axes = plt.subplots(2, 1, figsize=(14, 10), constrained_layout=True)
         plot_aspect_ratio_boxplots(axes[0], ar_df, layers, colors)
-        mean_speed_lines(axes[1], seg_df, layers, colors, speed_ylabel)
+        mean_speed_lines(
+            axes[1], seg_df, layers, colors, speed_ylabel, speed_error=args.speed_error
+        )
     elif args.plot == "aspect":
         fig, ax = plt.subplots(figsize=(14, 6), constrained_layout=True)
         plot_aspect_ratio_boxplots(ax, ar_df, layers, colors)
     else:
         fig, ax = plt.subplots(figsize=(14, 6), constrained_layout=True)
-        mean_speed_lines(ax, seg_df, layers, colors, speed_ylabel)
+        mean_speed_lines(ax, seg_df, layers, colors, speed_ylabel, speed_error=args.speed_error)
 
     if args.output:
         out_dir = os.path.dirname(args.output)
