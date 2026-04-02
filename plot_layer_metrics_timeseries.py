@@ -1,7 +1,7 @@
 """
 Plot per-layer aspect ratio (boxplots over time) and mean track speed (lines over time).
-Reads objects_with_layers.csv and optionally converted_tracks.csv. Layers 0–9 use fixed
-tab10 colors; subset via --layers. Use --panels to show both plots, aspect only, or speed only.
+Reads objects_with_layers.csv and optionally converted_tracks.csv. Layers 0-9 use fixed
+tab10 colors; subset via --layers. Use --plot to show both plots, aspect only, or speed only.
 """
 from __future__ import annotations
 
@@ -187,12 +187,10 @@ def main() -> None:
     parser.add_argument(
         "--tracks",
         default=converted_tracks_csv_path,
-        help="converted_tracks CSV (required for speed panels)",
+        help="converted_tracks CSV (required for speed plot)",
     )
     parser.add_argument(
-        "--panels",
         "--plot",
-        dest="panels",
         choices=("both", "aspect", "speed"),
         default="both",
         help="Which plot(s): both (default), aspect only, or speed only",
@@ -235,8 +233,8 @@ def main() -> None:
 
     layers = parse_layers(args.layers)
     colors = layer_palette()
-    want_aspect = args.panels in ("both", "aspect")
-    want_speed = args.panels in ("both", "speed")
+    want_aspect = args.plot in ("both", "aspect")
+    want_speed = args.plot in ("both", "speed")
 
     objects_df: pd.DataFrame | None = None
     if want_aspect or want_speed:
@@ -244,9 +242,15 @@ def main() -> None:
             print(f"Error: CSV not found: {args.csv}", file=sys.stderr)
             sys.exit(1)
         objects_df = pd.read_csv(args.csv)
-        if LAYER_COLUMN not in objects_df.columns or "x" not in objects_df.columns:
-            print(f"Error: {args.csv} must include '{LAYER_COLUMN}', x, y.", file=sys.stderr)
-            sys.exit(1)
+        if want_speed:
+            required = {"t", "x", "y", LAYER_COLUMN}
+            missing = sorted(required - set(objects_df.columns))
+            if missing:
+                print(
+                    f"Error: {args.csv} missing required columns for speed plot: {missing}",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
 
     ar_df = pd.DataFrame()
     if want_aspect:
@@ -281,11 +285,11 @@ def main() -> None:
         else "Speed (px / frame)"
     )
 
-    if args.panels == "both":
+    if args.plot == "both":
         fig, axes = plt.subplots(2, 1, figsize=(14, 10), constrained_layout=True)
         plot_aspect_ratio_boxplots(axes[0], ar_df, layers, colors)
         mean_speed_lines(axes[1], seg_df, layers, colors, speed_ylabel)
-    elif args.panels == "aspect":
+    elif args.plot == "aspect":
         fig, ax = plt.subplots(figsize=(14, 6), constrained_layout=True)
         plot_aspect_ratio_boxplots(ax, ar_df, layers, colors)
     else:

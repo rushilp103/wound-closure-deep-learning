@@ -48,6 +48,11 @@ def run_tracking():
     # 1. Load Data
     print(f"Loading objects from {INPUT_CSV}...")
     objects_df = pd.read_csv(INPUT_CSV)
+    print(f"  > Original number of objects: {len(objects_df)}")
+    
+    # Reducing number of objects to the first 40
+    objects_df = objects_df[objects_df['t'] < 40]
+    print(f"  > Reduced number of objects to {len(objects_df)}")
     
     # Sort by time (required for tracking)
     if 't' in objects_df.columns:
