@@ -98,11 +98,18 @@ def main():
     if "layer_centroid" in result.columns:
         valid = result[result["layer_centroid"] >= 1]
         invalid = (result["layer_centroid"] == -2).sum()
-        print(
-            f"  layer_centroid: {valid['layer_centroid'].nunique()} unique layers, "
-            f"range [{valid['layer_centroid'].min()}, {valid['layer_centroid'].max()}], "
-            f"invalid_outside={invalid}"
-        )
+        if valid.empty:
+            print(
+                f"  layer_centroid: no cells with valid outside-wound layers (>= 1), "
+                f"invalid_outside={invalid}"
+            )
+        else:
+            lc = valid["layer_centroid"]
+            print(
+                f"  layer_centroid: {lc.nunique()} unique layers, "
+                f"range [{lc.min()}, {lc.max()}], "
+                f"invalid_outside={invalid}"
+            )
 
 
 if __name__ == "__main__":
