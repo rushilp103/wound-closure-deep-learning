@@ -1,7 +1,8 @@
 """
 Plot per-layer aspect ratio (boxplots over time) and mean track speed (lines over time).
-Reads objects_with_layers.csv and optionally converted_tracks.csv. Layers 0-9 use fixed
-tab10 colors; subset via --layers. Use --plot to show both plots, aspect only, or speed only.
+Reads objects_with_layers.csv and optionally converted_tracks.csv. Outside-wound layers are
+1-based (1..10 by default, matching assign_layers.py); tab10 colors map layer N to palette N-1.
+Subset via --layers. Use --plot to show both plots, aspect only, or speed only.
 """
 from __future__ import annotations
 
@@ -18,13 +19,14 @@ from scipy.spatial import cKDTree
 from pipeline_config import converted_tracks_csv_path, objects_with_layers_csv_path
 
 LAYER_COLUMN = "layer_centroid"
-DEFAULT_LAYERS = list(range(10))
+# assign_layers.py writes 1-based outside-wound layers 1..num_layers (default num_layers=10).
+DEFAULT_LAYERS = list(range(1, 11))
 
 
 def layer_palette() -> dict[int, tuple]:
-    """Fixed colors for layer IDs 0..9 (tab10)."""
+    """Fixed colors for layer IDs 1..10 (tab10 index layer-1)."""
     pal = sns.color_palette("tab10", 10)
-    return {i: pal[i] for i in range(10)}
+    return {i: pal[i - 1] for i in range(1, 11)}
 
 
 def parse_layers(s: str | None) -> list[int]:
@@ -32,8 +34,8 @@ def parse_layers(s: str | None) -> list[int]:
         return list(DEFAULT_LAYERS)
     parts = [int(x.strip()) for x in str(s).split(",") if x.strip()]
     for p in parts:
-        if p < 0 or p > 9:
-            print(f"Error: layer IDs must be in 0..9, got {p}.", file=sys.stderr)
+        if p < 1 or p > 10:
+            print(f"Error: layer IDs must be in 1..10, got {p}.", file=sys.stderr)
             sys.exit(1)
     return sorted(set(parts))
 
@@ -199,7 +201,7 @@ def main() -> None:
         "--layers",
         type=str,
         default=None,
-        help="Comma-separated layer IDs 0-9 (default: all ten 0-9)",
+        help="Comma-separated layer IDs 1-10 (default: all ten 1-10; matches assign_layers.py)",
     )
     parser.add_argument("-o", "--output", default=None, help="Save figure to this path (PNG/PDF/...)")
     parser.add_argument(
