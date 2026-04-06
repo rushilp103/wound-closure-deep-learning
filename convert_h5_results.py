@@ -14,7 +14,13 @@ def convert_h5_to_csv():
     print(f'Opening HDF5 file: {H5_FILE_PATH}')
 
     with btrack.io.HDF5FileHandler(H5_FILE_PATH, 'r', obj_type='obj_type_1') as reader:
-        tracks = reader.tracks
+        try:
+            tracks = reader.tracks
+        except IndexError as e:
+            raise RuntimeError(
+                "Failed to read tracks from HDF5: track references don't match stored objects. "
+                "This usually happens when PyTrackObject.ID isn't 0..N-1 contiguous during export."
+            ) from e
         print(f'    > Loaded {len(tracks)} tracks from HDF5.')
 
         if len(tracks) == 0:

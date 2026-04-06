@@ -27,18 +27,25 @@ def create_btrack_objects(df):
     objects = []
 
     # Iterate through the dataframe
-    for row in tqdm(df.itertuples(index=False), total=len(df), desc="Creating objects"):
+    for i, row in enumerate(tqdm(df.itertuples(index=False), total=len(df), desc="Creating objects")):
         obj = PyTrackObject()
         
-        obj.ID = int(row.obj_id)
+        # btrack track references are indices into the object list, so IDs must
+        # be contiguous 0..N-1 for correct HDF5 export/import.
+        obj.ID = i
         obj.x = float(row.x)
         obj.y = float(row.y)
         obj.z = 0.0   # Explicitly 0.0 for 2D tracking
         obj.t = int(row.t)
         obj.dummy = False 
         
-        if hasattr(row, 'area'):
-            obj.properties = {'area': float(row.area)}
+        props = {}
+        if hasattr(row, "area"):
+            props["area"] = float(row.area)
+        if hasattr(row, "obj_id"):
+            props["orig_obj_id"] = int(row.obj_id)
+        if props:
+            obj.properties = props
             
         objects.append(obj)
         
