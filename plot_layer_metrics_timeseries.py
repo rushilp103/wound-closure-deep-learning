@@ -250,6 +250,7 @@ def plot_aspect_ratio_front_rear(
             ax=ax,
             linewidth=0.8,
             fliersize=1.5,
+            native_scale=True,
         )
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("Aspect ratio")
@@ -517,7 +518,7 @@ def mean_speed_lines(
             )
         else:
             x_lo, x_hi = 0.0, 1.0
-        ax.set_xlim(x_lo, x_hi)
+        ax.set_xlim(x_lo, 30.0)
         apply_time_axis_hours_ticks(ax)
     ax.set_xlabel("Time (h)" if x_axis_hours else "Frame (t)")
     ax.set_ylabel(ylabel)
