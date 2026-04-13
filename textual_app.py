@@ -76,33 +76,6 @@ def open_path_in_viewer(path: Path) -> None:
         raise RuntimeError(f"Could not open viewer: {e}") from e
 
 
-def ascii_preview_in_log(log_write, path: Path, max_w: int = 72, max_h: int = 36) -> None:
-    try:
-        from PIL import Image as PILImage
-    except ImportError:
-        log_write("(ASCII preview needs Pillow: pip install pillow)")
-        return
-    try:
-        im = PILImage.open(path).convert("L")
-        w, h = im.size
-        scale = min(max_w / w, max_h / h, 1.0)
-        nw = max(1, int(w * scale))
-        nh = max(1, int(h * scale))
-        im = im.resize((nw, nh))
-        pix = im.load()
-        chars = " .:-=+*#%@"
-        log_write("(ASCII preview — low resolution)")
-        for y in range(nh):
-            line = ""
-            for x in range(nw):
-                v = int(pix[x, y])
-                idx = min(len(chars) - 1, v * (len(chars) - 1) // 255)
-                line += chars[idx]
-            log_write(line)
-    except OSError as e:
-        log_write(f"(ASCII preview failed: {e})")
-
-
 class PipelineApp(App[None]):
     CSS = """
     Screen { align: center middle; }
@@ -130,13 +103,15 @@ class PipelineApp(App[None]):
     .paths_row Static { width: 1fr; min-height: 2; }
     #paths_warn { height: auto; padding-top: 1; }
     
-    #btns { height: auto; padding: 1 0; }
+    #btns { height: auto; padding: 1 0 1 0; }
     Button { margin-right: 1; }
     #plot_kind { width: 16; margin-right: 1; }
     #ball { margin-left: 2; }
     
-    #plot_row { height: auto; padding: 0 0 1 0; }
-    #plot_row Label { margin-top: 1; }
+    #plot_path_row { height: auto; padding: 1 0 1 0; }
+    #plot_path_row Label { margin-top: 0; min-width: 8; height: 3; content-align: left middle; }
+    #save_plot_path { width: 1fr; max-width: 95; margin-right: 1; }
+    #plot_path_row Button { margin-right: 1; }
     
     #log { height: 1fr; border: round $success; min-height: 8; }
     """
@@ -203,12 +178,11 @@ class PipelineApp(App[None]):
                 )
                 yield Button("Run All", id="ball", variant="warning")
                 
-            with Horizontal(id="plot_row"):
+            with Horizontal(id="plot_path_row"):
                 yield Label("Save to ")
                 yield Input(placeholder="path/to/plot.png", id="save_plot_path")
                 yield Button("Save plot", id="save_plot", variant="success")
                 yield Button("Open preview", id="open_preview")
-                yield Button("ASCII preview", id="ascii_preview")
                 
             yield RichLog(id="log", highlight=False, markup=False, wrap=True, auto_scroll=True)
             
@@ -245,7 +219,6 @@ class PipelineApp(App[None]):
         has_preview = self._preview_file is not None or self._preview_dir is not None
         self.query_one("#save_plot", Button).disabled = not has_preview
         self.query_one("#open_preview", Button).disabled = not has_preview
-        self.query_one("#ascii_preview", Button).disabled = self._preview_file is None
 
     def refresh_paths(self) -> None:
         pc = reload_pipeline_config(self._read_env())
@@ -290,7 +263,7 @@ class PipelineApp(App[None]):
         if not busy:
             self._update_save_controls()
         else:
-            for bid in ("save_plot", "open_preview", "ascii_preview"):
+            for bid in ("save_plot", "open_preview"):
                 self.query_one(f"#{bid}", Button).disabled = True
 
     async def stream_subprocess(self, label: str, script: str, args: list[str]) -> int:
@@ -511,14 +484,6 @@ class PipelineApp(App[None]):
                 self.log_line("No preview available.")
         except RuntimeError as e:
             self.log_line(str(e))
-
-    @on(Button.Pressed, "#ascii_preview")
-    def on_ascii_preview(self) -> None:
-        if self._preview_file and self._preview_file.is_file():
-            ascii_preview_in_log(self.log_line, self._preview_file)
-        else:
-            self.log_line("ASCII preview is only for a single plot (step 6).")
-
 
 def main() -> None:
     PipelineApp().run()

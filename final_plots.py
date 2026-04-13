@@ -122,7 +122,8 @@ def plot_aspect_ratio_front_rear(axes: tuple[plt.Axes, plt.Axes], df: pd.DataFra
         if plot_df.empty: continue
         order = sorted(plot_df["x_plot"].unique())
         
-        sns.boxplot(data=plot_df, x="x_plot", y="aspect_ratio", order=order, palette="crest", ax=ax,
+        sns.boxplot(data=plot_df, x="x_plot", y="aspect_ratio", order=order, hue="x_plot", hue_order=order,
+                    palette="crest", dodge=False, legend=False, ax=ax,
                     linewidth=1.5, fliersize=1.2, flierprops={"alpha": 0.3, "marker": "o", "markeredgecolor": "none"})
         
         ax.set_title(title, fontweight='bold', loc='left', fontsize=14)
@@ -135,7 +136,8 @@ def plot_aspect_ratio_front_rear(axes: tuple[plt.Axes, plt.Axes], df: pd.DataFra
         else:
             ax.set_xlabel("Time (h)" if x_axis_hours else "Frame (t)")
             if x_axis_hours:
-                ax.set_xticklabels([f"{int(float(t.get_text()))}" for t in ax.get_xticklabels()])
+                ax.set_xticks(range(len(order)))
+                ax.set_xticklabels([f"{int(float(v))}" for v in order])
     
     sns.despine(offset=10, trim=True)
 
@@ -222,7 +224,8 @@ def plot_cell_size_zones_three(
         # We removed the ax.plot loop that was here previously.
         sns.boxplot(
             data=plot_df, x="time_point", y="cell_size", order=time_order,
-            palette=palette, dodge=False, ax=ax, linewidth=1.5,
+            hue="time_point", hue_order=time_order, palette=palette, dodge=False, legend=False,
+            ax=ax, linewidth=1.5,
             showfliers=True, fliersize=2.0,
             flierprops={"alpha": 0.15, "marker": "o", "markeredgecolor": "none", "markerfacecolor": "black"}
         )
