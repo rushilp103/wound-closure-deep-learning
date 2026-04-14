@@ -84,7 +84,8 @@ def segment_speeds_end_layer(track_with_layers: pd.DataFrame) -> pd.DataFrame:
 
 def aggregate_speed_into_time_bins(seg_df: pd.DataFrame, layers: list[int], mpf: float, bh: float, x_axis_hours: bool, um_per_pixel: float | None = None) -> pd.DataFrame:
     d = seg_df[seg_df["layer"].isin(layers)].copy()
-    if d.empty: return pd.DataFrame()
+    if d.empty:
+        return pd.DataFrame(columns=["x_plot", "layer", "mean", "sem"])
     
     # Apply unit conversion if calibration is provided
     if um_per_pixel is not None:

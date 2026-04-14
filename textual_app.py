@@ -7,8 +7,6 @@ your chosen path (results dir or elsewhere). Open preview uses the OS viewer.
 Run from project root:
   python textual_app.py
 
-Uses the Textual dark theme only (no light/dark toggle).
-
 A single µm/px value is used for assign-layers and for speed/size plots (omit
 physical scaling by setting µm/px to 0).
 """
