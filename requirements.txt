@@ -11,3 +11,4 @@ btrack==0.7.0
 cellpose==4.1.1
 torch==2.10.0
 napari==0.6.6
+textual>=0.85.0
