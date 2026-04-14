@@ -27,6 +27,10 @@ if torch.backends.mps.is_available():
     device = torch.device("mps")
     use_gpu = True
     print("Using Apple MPS for computation.")
+elif torch.backends.cuda.is_available():
+    device = torch.device("cuda")
+    use_gpu = True
+    print("Using CUDA for computation.")
 else:
     device = torch.device("cpu")
     use_gpu = False
