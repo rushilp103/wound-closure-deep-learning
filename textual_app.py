@@ -92,17 +92,18 @@ class PipelineApp(App[None]):
     
     #paths_container {
         height: auto;
-        min-height: 4;
-        padding: 1;
+        padding: 1 1 0 1;
         border: round $primary;
         margin-bottom: 1;
     }
     .paths_row { height: auto; }
     .paths_row Static { width: 1fr; min-height: 2; }
-    #paths_warn { height: auto; padding-top: 1; }
+    #paths_warn { height: auto; }
     
     #btns { height: auto; padding: 1 0 1 0; }
+    #spacer { width: 1fr; }
     Button { margin-right: 1; }
+    #b7, #b8 { min-width: 14; }
     #plot_kind { width: 16; margin-right: 1; }
     #ball { margin-left: 2; }
     
@@ -168,13 +169,19 @@ class PipelineApp(App[None]):
                 yield Button("3 Layers", id="b3")
                 yield Button("4 Track", id="b4")
                 yield Button("5 H5→CSV", id="b5")
+                yield Button("Run pipeline", id="ball", variant="warning")
+                
+                # Expanding spacer to separate left and right items
+                yield Static(id="spacer")
+                
                 yield Button("6 Plot", id="b6")
                 yield Select(
                     (("aspect", "aspect"), ("speed", "speed"), ("size", "size")),
                     id="plot_kind",
                     value="aspect",
                 )
-                yield Button("Run All", id="ball", variant="warning")
+                yield Button("7 View layers", id="b7")
+                yield Button("8 View tracks", id="b8")
                 
             with Horizontal(id="plot_path_row"):
                 yield Label("Save to ")
@@ -255,7 +262,7 @@ class PipelineApp(App[None]):
 
     def set_busy(self, busy: bool) -> None:
         self._busy = busy
-        for bid in ("b1", "b2", "b3", "b4", "b5", "b6", "ball"):
+        for bid in ("b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "ball"):
             self.query_one(f"#{bid}", Button).disabled = busy
         self.query_one("#plot_kind", Select).disabled = busy
         if not busy:
@@ -389,6 +396,14 @@ class PipelineApp(App[None]):
             self.set_busy(False)
             self._update_save_controls()
 
+    @on(Button.Pressed, "#b7")
+    async def on_b7(self) -> None:
+        await self._run_guarded("View layers", "view_layers.py", [])
+
+    @on(Button.Pressed, "#b8")
+    async def on_b8(self) -> None:
+        await self._run_guarded("View tracks", "view_tracks.py", [])
+
     @on(Button.Pressed, "#ball")
     async def on_ball(self) -> None:
         if self._busy:
@@ -417,24 +432,7 @@ class PipelineApp(App[None]):
                 code = await self.stream_subprocess(label, script, args)
                 if code != 0:
                     return
-            pc = reload_pipeline_config(self._read_env())
-            tdir = Path(tempfile.mkdtemp(prefix="wound_plots_"))
-            self._clear_preview_state()
-            self._preview_dir = tdir
-            for pk in ("aspect", "speed", "size"):
-                out = tdir / f"{pc.BASE_NAME}_plot_{pk}.png"
-                cmd_args = self._final_plots_args(pk, out)
-                code = await self.stream_subprocess(f"Final plot · {pk}", "final_plots.py", cmd_args)
-                if code != 0:
-                    self.log_line(f"Plot step failed; previews in {tdir}")
-                    return
-            self.log_line(f"All plots preview folder (temp, not in results): {tdir}")
-            self.query_one("#save_plot_path", Input).value = str(Path(pc.RESULTS_DIR))
-            try:
-                open_path_in_viewer(tdir)
-                self.log_line("Opened preview folder in system file manager.")
-            except RuntimeError as e:
-                self.log_line(str(e))
+            self.log_line("Pipeline steps 1-5 completed.")
         finally:
             self.set_busy(False)
             self.refresh_paths()
